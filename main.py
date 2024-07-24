@@ -8,6 +8,7 @@ app = FastAPI()
 class CreateUser(BaseModel):
     email: EmailStr
 
+
 @app.get('')
 def index():
     return {
@@ -44,6 +45,24 @@ def create_user(user: CreateUser):
     return {
         'status': 'HTTP_201_CREATED',
         'email': user.email
+    }
+
+
+@app.post('/calc')
+def calc(a: int, b: int):
+    return {
+        'a': a,
+        'b': b,
+        'sum': a + b
+    }
+
+
+@app.get('/kalkulator')
+def kalk(a: int, b: int):
+    return {
+        'a': a,
+        'b': b,
+        'sum': a + b
     }
 
 
