@@ -1,21 +1,24 @@
 [tool.poetry]
 name = "microshop"
 version = "0.1.0"
-description = ""
+description = "Microshop to sell MacroItems!"
 authors = ["Alexey Kogan <alekseikogan@yandex.ru>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.111.1"
-pydantic = "^2.8.2"
-sqlalchemy = {extras = ["asyncio"], version = "^2.0.31"}
-aiosqlite = "^0.20.0"
+fastapi = {extras = ["all"], version = "^0.111.1"}
+uvicorn = {extras = ["standart"], version = "^0.30.3"}
 pydantic-settings = "^2.3.4"
+pydantic = "^2.8.2"
+sqlalchemy = "^2.0.31"
+aiosqlite = "^0.20.0"
+python-multipart = "^0.0.9"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.3.1"
+pytest = "^8.3.2"
 
 [build-system]
 requires = ["poetry-core"]
