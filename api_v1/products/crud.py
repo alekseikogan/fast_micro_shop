@@ -33,22 +33,11 @@ async def create_product(session: AsyncSession, product_in: ProductCreate) -> Pr
 async def update_product(
         session: AsyncSession,
         product: Product,
-        product_update: ProductUpdate) -> Product:
-    """PUT - Обновление записи."""
+        product_update: ProductUpdate | ProductPartialUpdate,
+        partial: bool) -> Product:
+    """PUT / PATCH - Обновление записи."""
 
-    for name, value in product_update.model_dump().items():
-        setattr(product, name, value)
-    await session.commit()
-    return product
-
-
-async def partial_update_product(
-        session: AsyncSession,
-        product: Product,
-        product_partial_update: ProductPartialUpdate) -> Product:
-    """PATCH - Частичное обновление записи."""
-
-    for name, value in product_partial_update.model_dump(exclude_unset=True).items():
+    for name, value in product_update.model_dump(exclude_unset=partial).items():
         setattr(product, name, value)
     await session.commit()
     return product
