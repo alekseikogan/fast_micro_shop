@@ -42,7 +42,7 @@ async def update_product(
         product_update: ProductUpdate | ProductPartialUpdate,
         partial: bool
 ) -> Product:
-    """PUT / PATCH - Обновление продукта."""
+    """PUT / PATCH //// - Обновление продукта."""
 
     for name, value in product_update.model_dump(exclude_unset=partial).items():
         setattr(product, name, value)
