@@ -15,13 +15,19 @@ async def get_products(session: AsyncSession) -> List[Product]:
     return list(products)
 
 
-async def get_product(session: AsyncSession, product_id: int) -> Product | None:
+async def get_product(
+        session: AsyncSession,
+        product_id: int
+) -> Product | None:
     """RETRIEVE - Получение продукта по id."""
 
     return await session.get(Product, product_id)
 
 
-async def create_product(session: AsyncSession, product_in: ProductCreate) -> Product:
+async def create_product(
+        session: AsyncSession,
+        product_in: ProductCreate
+) -> Product:
     """CREATE - Создание продукта."""
 
     product = Product(**product_in.model_dump())
@@ -34,10 +40,21 @@ async def update_product(
         session: AsyncSession,
         product: Product,
         product_update: ProductUpdate | ProductPartialUpdate,
-        partial: bool) -> Product:
-    """PUT / PATCH - Обновление записи."""
+        partial: bool
+) -> Product:
+    """PUT / PATCH - Обновление продукта."""
 
     for name, value in product_update.model_dump(exclude_unset=partial).items():
         setattr(product, name, value)
     await session.commit()
     return product
+
+
+async def delete_product(
+        session: AsyncSession,
+        product: Product
+) -> Product:
+    """DELETE - Удаление продукта."""
+
+    await session.delete(product)
+    await session.commit()
