@@ -7,7 +7,7 @@ from core.models import db_helper
 
 from . import crud
 from .dependencies import product_by_id
-from .schemas import Product, ProductCreate
+from .schemas import Product, ProductCreate, ProductUpdate
 
 router = APIRouter(
     prefix='/products',
@@ -40,23 +40,13 @@ async def create_product(
 
 @router.put('/{product_id}', response_model=Product)
 async def update_product(
-    product: Product = Depends(product_by_id)
+    product_update: ProductUpdate,
+    product: Product = Depends(product_by_id),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     """PUT - Обновление продукта."""
     return await crud.update_product(
-        session=product.session,
+        session=session,
         product=product,
-        product_update=product,
+        product_update=product_update,
         partial=False)
-
-
-@router.put('/{product_id}', response_model=Product)
-async def partial_update_product(
-    product: Product = Depends(product_by_id)
-):
-    """PATCH - Обновление продукта."""
-    return await crud.update_product(
-        session=product.session,
-        product=product,
-        product_update=product,
-        partial=True)

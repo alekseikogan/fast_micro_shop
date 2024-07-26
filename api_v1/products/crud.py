@@ -11,7 +11,7 @@ async def get_products(session: AsyncSession) -> List[Product]:
 
     stmt = select(Product).order_by(Product.id)
     result: Result = await session.execute(stmt)
-    products = result.mappings().all()
+    products = result.scalars().all()
     return list(products)
 
 
@@ -40,9 +40,9 @@ async def update_product(
         session: AsyncSession,
         product: Product,
         product_update: ProductUpdate | ProductPartialUpdate,
-        partial: bool
+        partial: bool = False,
 ) -> Product:
-    """PUT / PATCH //// - Обновление продукта."""
+    """PUT / PATCH - Обновление продукта."""
 
     for name, value in product_update.model_dump(exclude_unset=partial).items():
         setattr(product, name, value)
