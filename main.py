@@ -2,8 +2,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-from core.models import db_helper
-from core.models.base import Base
+from core.models import db_helper, Base
 from items_views import router as items_router
 from users.views import router as users_router
 
@@ -41,15 +40,6 @@ def hello(name: str = 'world'):
 
 @app.post('/calc')
 def calc(a: int, b: int):
-    return {
-        'a': a,
-        'b': b,
-        'sum': a + b
-    }
-
-
-@app.get('/kalkulator')
-def kalk(a: int, b: int):
     return {
         'a': a,
         'b': b,
