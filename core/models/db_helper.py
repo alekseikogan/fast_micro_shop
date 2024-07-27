@@ -28,6 +28,7 @@ class DatabaseHelper:
 
     async def scoped_session_dependency(self) -> AsyncSession:
         """Конкретная сессия, через которую будем рабоать с БД."""
+
         session = self.get_scoped_session()
         yield session
         await session.close()
