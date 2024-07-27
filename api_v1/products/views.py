@@ -7,7 +7,7 @@ from core.models import db_helper
 
 from . import crud
 from .dependencies import product_by_id
-from .schemas import Product, ProductCreate, ProductUpdate
+from .schemas import Product, ProductCreate, ProductPartialUpdate, ProductUpdate
 
 router = APIRouter(
     prefix='/products',
@@ -38,7 +38,7 @@ async def create_product(
     return await crud.create_product(session=session, product_in=product_in)
 
 
-@router.put('/{product_id}', response_model=Product)
+@router.put('/{product_id}')
 async def update_product(
     product_update: ProductUpdate,
     product: Product = Depends(product_by_id),
@@ -49,4 +49,32 @@ async def update_product(
         session=session,
         product=product,
         product_update=product_update,
-        partial=False)
+    )
+
+
+@router.patch('/{product_id}')
+async def partial_update_product(
+    product_update: ProductPartialUpdate,
+    product: Product = Depends(product_by_id),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+):
+    """PATCH - Частичное обновление продукта."""
+    return await crud.update_product(
+        session=session,
+        product=product,
+        product_update=product_update,
+        partial=True,
+    )
+
+
+@router.delete('/{product_id}')
+async def delete_product(
+    product: Product = Depends(product_by_id),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+):
+    """DELETE - Удаление продукта."""
+
+    await crud.delete_product(session=session, product=product)
+    return {
+        'success': True,
+        'message': f'Продукт id={product.id} {product.name} успешно удален!'}

@@ -11,6 +11,7 @@ async def product_by_id(
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ) -> Product:
     """Получение продукта по id."""
+
     product = await crud.get_product(session=session, product_id=product_id)
     if product is not None:
         return product

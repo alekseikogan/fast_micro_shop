@@ -1,8 +1,10 @@
 from typing import List
+
 from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_v1.products.schemas import ProductCreate, ProductPartialUpdate, ProductUpdate
+from api_v1.products.schemas import (ProductCreate, ProductPartialUpdate,
+                                     ProductUpdate)
 from core.models import Product
 
 
