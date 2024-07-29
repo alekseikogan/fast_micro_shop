@@ -16,6 +16,7 @@ pydantic = "^2.8.2"
 sqlalchemy = "^2.0.31"
 aiosqlite = "^0.20.0"
 python-multipart = "^0.0.9"
+alembic = "^1.13.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
