@@ -19,7 +19,6 @@ from users.views import router as users_router
 
 app = FastAPI(
     title='MicroShop',
-    lifespan=lifespan
 )
 
 app.include_router(items_router)
