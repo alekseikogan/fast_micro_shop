@@ -7,7 +7,7 @@ from .base import Base
 
 
 class Post(Base, UserRelationMixin):
-    _user_back_populates = 'post'
+    _user_back_populates = 'posts'
 
     title: Mapped[str] = mapped_column(String(100), unique=False)
     text: Mapped[str] = mapped_column(
