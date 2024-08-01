@@ -2,7 +2,7 @@ import asyncio
 from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from core.models import Post, Profile, User, db_helper
 
@@ -58,15 +58,27 @@ async def create_post(session: AsyncSession, user_id: int, title: str, text: str
 
 
 async def get_users_with_posts(session: AsyncSession):
-    stmt = select(User).options(joinedload(User.posts)).order_by(User.id)
+    stmt = select(User).options(selectinload(User.posts)).order_by(User.id)
     users = await session.scalars(stmt)
 
-    for user in users.unique():
-        print('*' * 15)
+    for user in users:
+        print('**' * 15)
         print(user)
         for post in user.posts:
             print(post.title)
             print(post.text)
+
+
+async def get_posts_with_authors(session: AsyncSession):
+    stmt = select(Post).options(joinedload(Post.user)).order_by(Post.id)
+    posts = await session.scalars(stmt)
+
+    i = 1
+    for post in posts:
+        print('**' * 15)
+        print(f'Пост № {i}:')
+        print(post.title, post.text, sep='\n')
+        i += 1
 
 
 async def main():
@@ -86,7 +98,8 @@ async def main():
         # title = 'Пост 4'
         # text = 'Заинтересован в публикации ВАК'
         # await create_post(session=session, user_id=3, title=title, text=text)
-        await get_users_with_posts(session=session)
+        # await get_users_with_posts(session=session)
+        await get_posts_with_authors(session=session)
 
 if __name__ == "__main__":
     asyncio.run(main())
