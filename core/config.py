@@ -7,13 +7,14 @@ DB_PATH = BASE_DIR / "shop_db.sqlite3"
 
 
 class DbSettings(BaseModel):
-    url: str = f'sqlite+aiosqlite:///{DB_PATH}'
+    url: str = f"sqlite+aiosqlite:///{DB_PATH}"
     echo: bool = False
 
 
 class Settings(BaseSettings):
-    '''Для подгрузки переменных окружения.'''
-    api_v1_prefix: str = '/api/v1'
+    """Для подгрузки переменных окружения."""
+
+    api_v1_prefix: str = "/api/v1"
 
     db: DbSettings = DbSettings()
 

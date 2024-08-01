@@ -3,8 +3,7 @@ from typing import List
 from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_v1.products.schemas import (ProductCreate, ProductPartialUpdate,
-                                     ProductUpdate)
+from api_v1.products.schemas import ProductCreate, ProductPartialUpdate, ProductUpdate
 from core.models import Product
 
 
@@ -17,19 +16,13 @@ async def get_products(session: AsyncSession) -> List[Product]:
     return list(products)
 
 
-async def get_product(
-        session: AsyncSession,
-        product_id: int
-) -> Product | None:
+async def get_product(session: AsyncSession, product_id: int) -> Product | None:
     """RETRIEVE - Получение продукта по id."""
 
     return await session.get(Product, product_id)
 
 
-async def create_product(
-        session: AsyncSession,
-        product_in: ProductCreate
-) -> Product:
+async def create_product(session: AsyncSession, product_in: ProductCreate) -> Product:
     """CREATE - Создание продукта."""
 
     product = Product(**product_in.model_dump())
@@ -39,10 +32,10 @@ async def create_product(
 
 
 async def update_product(
-        session: AsyncSession,
-        product: Product,
-        product_update: ProductUpdate | ProductPartialUpdate,
-        partial: bool = False,
+    session: AsyncSession,
+    product: Product,
+    product_update: ProductUpdate | ProductPartialUpdate,
+    partial: bool = False,
 ) -> Product:
     """PUT / PATCH - Обновление продукта."""
 
@@ -52,10 +45,7 @@ async def update_product(
     return product
 
 
-async def delete_product(
-        session: AsyncSession,
-        product: Product
-) -> Product:
+async def delete_product(session: AsyncSession, product: Product) -> Product:
     """DELETE - Удаление продукта."""
 
     await session.delete(product)

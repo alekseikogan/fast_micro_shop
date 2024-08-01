@@ -36,7 +36,7 @@ async def create_user_profile(
 
 
 async def show_users_with_profiles(session: AsyncSession) -> List[User]:
-    stmt = select(User).options(joinedload(User.profile)).order_by(User.id)
+    stmt = select(User).options((User.profile)).order_by(User.id)
     users = await session.scalars(stmt)
     i = 1
     for user in users:
@@ -81,25 +81,35 @@ async def get_posts_with_authors(session: AsyncSession):
         i += 1
 
 
+async def main_relations(session: AsyncSession):
+    # await create_user(session=session, username='Mark ')
+    # await create_user(session=session, username='Anna')
+    # await get_user_by_username(session=session, username="Mark")
+    # await get_user_by_username(session=session, username="Tanya")
+    # user = await get_user_by_username(session=session, username="Mark")
+    # await create_user_profile(
+    #     session=session,
+    #     user_id=user.id,
+    #     first_name="Kogan",
+    #     last_name='Mark'
+    # )
+    # await show_users_with_profiles(session=session)
+    # title = 'Пост 4'
+    # text = 'Заинтересован в публикации ВАК'
+    # await create_post(session=session, user_id=3, title=title, text=text)
+    # await get_users_with_posts(session=session)
+    # await get_posts_with_authors(session=session)
+    pass
+
+
+async def demo_m2m(session: AsyncSession):
+    pass
+
+
 async def main():
     async with db_helper.session_factory() as session:
-        # await create_user(session=session, username='Mark ')
-        # await create_user(session=session, username='Anna')
-        # await get_user_by_username(session=session, username="Mark")
-        # await get_user_by_username(session=session, username="Tanya")
-        # user = await get_user_by_username(session=session, username="Mark")
-        # await create_user_profile(
-        #     session=session,
-        #     user_id=user.id,
-        #     first_name="Kogan",
-        #     last_name='Mark'
-        # )
-        # await show_users_with_profiles(session=session)
-        # title = 'Пост 4'
-        # text = 'Заинтересован в публикации ВАК'
-        # await create_post(session=session, user_id=3, title=title, text=text)
-        # await get_users_with_posts(session=session)
-        await get_posts_with_authors(session=session)
+        await main_relations(session)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
