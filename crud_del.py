@@ -131,40 +131,68 @@ async def create_product(
     return product
 
 
+async def create_orders_and_products(session: AsyncSession):
+    order_one = await create_order(session)
+    order_promo = await create_order(session, promocode="promo")
+
+    bread = await create_product(
+        session, name="Хлеб", price=40, description="Бородинский хлеб"
+    )
+    meat = await create_product(
+        session, name="Колбаса", price=150, description="Колбаса для хлеба"
+    )
+    cheese = await create_product(
+        session, name="Кыр сосичка", price=100, description="Чеддыр"
+    )
+
+    order_one = await session.scalar(
+        select(Order)
+        .where(Order.id == order_one.id)
+        .options(selectinload(Order.products)),
+    )
+    order_promo = await session.scalar(
+        select(Order)
+        .where(Order.id == order_promo.id)
+        .options(selectinload(Order.products)),
+    )
+
+    order_one.products.append(bread)
+    order_one.products.append(meat)
+    order_promo.products.append(bread)
+    order_promo.products.append(cheese)
+
+    order_promo.products = [bread, cheese]
+    print("Заказы добавлены")
+    await session.commit()
+
+
+async def get_orders_with_products(session: AsyncSession) -> list[Order]:
+    stmt = (
+        select(Order)
+        .options(
+            selectinload(Order.products),
+        )
+        .order_by(Order.id)
+    )
+    orders = await session.scalars(stmt)
+
+    return list(orders)
+
+
+async def get_orders_with_products_through_secondary(session: AsyncSession):
+    orders = await get_orders_with_products(session)
+    for order in orders:
+        print(order.id, order.promocode, order.created_at, "products:")
+        for product in order.products:
+            print("-", product.id, product.name, product.price)
+
+
 async def demo_m2m(session: AsyncSession):
-    pass
-    # order_one = await create_order(session)
-    # order_promo = await create_order(session, promocode="promo")
-
-    # bread = await create_product(
-    #     session, name="Хлеб", price=40, description="Бородинский хлеб"
-    # )
-    # meat = await create_product(
-    #     session, name="Колбаса", price=150, description="Колбаса для хлеба"
-    # )
-    # cheese = await create_product(
-    #     session, name="Кыр сосичка", price=100, description="Чеддыр"
-    # )
-
-    # order_one = await session.scalar(
-    #     select(Order)
-    #     .where(Order.id == order_one.id)
-    #     .options(selectinload(Order.products)),
-    # )
-    # order_promo = await session.scalar(
-    #     select(Order)
-    #     .where(Order.id == order_promo.id)
-    #     .options(selectinload(Order.products)),
-    # )
-
-    # order_one.products.append(bread)
-    # order_one.products.append(meat)
-    # order_promo.products.append(bread)
-    # order_promo.products.append(cheese)
-
-    # order_promo.products = [bread, cheese]
-    # print("Заказы добавлены")
-    # await session.commit()
+    orders = await get_orders_with_products(session)
+    for order in orders:
+        print(order.id, order.promocode, order.created_at, "products:")
+        for product in order.products:
+            print("-", product.id, product.name, product.price)
 
 
 async def main():
