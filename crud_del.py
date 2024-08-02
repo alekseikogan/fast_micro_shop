@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from core.models import Post, Profile, User, db_helper
+from core.models.order import Order
+from core.models.product import Product
 
 
 async def create_user(session: AsyncSession, username: str) -> User:
@@ -30,7 +32,7 @@ async def create_user_profile(
 ) -> Profile:
     profile = Profile(user_id=user_id, first_name=first_name, last_name=last_name)
     session.add(profile)
-    print(f'Создан профиль для user_id = {user_id}')
+    print(f"Создан профиль для user_id = {user_id}")
     await session.commit()
     return profile
 
@@ -40,19 +42,21 @@ async def show_users_with_profiles(session: AsyncSession) -> List[User]:
     users = await session.scalars(stmt)
     i = 1
     for user in users:
-        print(f'{i}.', end='')
-        print(f'user = {user}')
+        print(f"{i}.", end="")
+        print(f"user = {user}")
         if user.profile:
-            print(f'first_name = {user.profile.first_name}')
+            print(f"first_name = {user.profile.first_name}")
         i += 1
 
 
-async def create_post(session: AsyncSession, user_id: int, title: str, text: str) -> Post:
+async def create_post(
+    session: AsyncSession, user_id: int, title: str, text: str
+) -> Post:
     post = Post(user_id=user_id, title=title, text=text)
     session.add(post)
-    print(f'Создан пост для user_id = {user_id}')
-    print(f'title={title}')
-    print(f'text={text}')
+    print(f"Создан пост для user_id = {user_id}")
+    print(f"title={title}")
+    print(f"text={text}")
     await session.commit()
     return post
 
@@ -62,7 +66,7 @@ async def get_users_with_posts(session: AsyncSession):
     users = await session.scalars(stmt)
 
     for user in users:
-        print('**' * 15)
+        print("**" * 15)
         print(user)
         for post in user.posts:
             print(post.title)
@@ -75,9 +79,9 @@ async def get_posts_with_authors(session: AsyncSession):
 
     i = 1
     for post in posts:
-        print('**' * 15)
-        print(f'Пост № {i}:')
-        print(post.title, post.text, sep='\n')
+        print("**" * 15)
+        print(f"Пост № {i}:")
+        print(post.title, post.text, sep="\n")
         i += 1
 
 
@@ -102,13 +106,70 @@ async def main_relations(session: AsyncSession):
     pass
 
 
+async def create_order(session: AsyncSession, promocode: str | None = None) -> Order:
+    order = Order(promocode=promocode)
+    session.add(order)
+    await session.commit()
+    return order
+
+
+async def create_product(
+    session: AsyncSession,
+    name: str,
+    price: int,
+    description: str,
+) -> Product:
+
+    product = Product(
+        name=name,
+        price=price,
+        description=description,
+    )
+
+    session.add(product)
+    await session.commit()
+    return product
+
+
 async def demo_m2m(session: AsyncSession):
     pass
+    # order_one = await create_order(session)
+    # order_promo = await create_order(session, promocode="promo")
+
+    # bread = await create_product(
+    #     session, name="Хлеб", price=40, description="Бородинский хлеб"
+    # )
+    # meat = await create_product(
+    #     session, name="Колбаса", price=150, description="Колбаса для хлеба"
+    # )
+    # cheese = await create_product(
+    #     session, name="Кыр сосичка", price=100, description="Чеддыр"
+    # )
+
+    # order_one = await session.scalar(
+    #     select(Order)
+    #     .where(Order.id == order_one.id)
+    #     .options(selectinload(Order.products)),
+    # )
+    # order_promo = await session.scalar(
+    #     select(Order)
+    #     .where(Order.id == order_promo.id)
+    #     .options(selectinload(Order.products)),
+    # )
+
+    # order_one.products.append(bread)
+    # order_one.products.append(meat)
+    # order_promo.products.append(bread)
+    # order_promo.products.append(cheese)
+
+    # order_promo.products = [bread, cheese]
+    # print("Заказы добавлены")
+    # await session.commit()
 
 
 async def main():
     async with db_helper.session_factory() as session:
-        await main_relations(session)
+        await demo_m2m(session)
 
 
 if __name__ == "__main__":
