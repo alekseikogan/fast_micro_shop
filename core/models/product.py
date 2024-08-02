@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING, List
 from sqlalchemy.orm import Mapped, relationship
 
 from .base import Base
-from .order_product_ass import order_product_association
 
 if TYPE_CHECKING:
     # импортируем только при проверке типов, а при реальном
@@ -16,5 +15,8 @@ class Product(Base):
     description: Mapped[str]
 
     orders: Mapped[List["Order"]] = relationship(
-        secondary=order_product_association, back_populates="products"
+        secondary="order_product_association", back_populates="products"
     )
+    # orders_details: Mapped[list["OrderProductAssociation"]] = relationship(
+    #     back_populates="product",
+    # )
