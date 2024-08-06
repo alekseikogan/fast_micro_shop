@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from core.models import Post, Profile, User, db_helper
 from core.models.order import Order
+from core.models.order_product_ass import OrderProductAssociation
 from core.models.product import Product
 
 
@@ -166,11 +167,39 @@ async def create_orders_and_products(session: AsyncSession):
     await session.commit()
 
 
-async def get_orders_with_products(session: AsyncSession) -> list[Order]:
+# async def get_orders_with_products(session: AsyncSession) -> list[Order]:
+#     stmt = (
+#         select(Order)
+#         .options(
+#             selectinload(Order.products),
+#         )
+#         .order_by(Order.id)
+#     )
+#     orders = await session.scalars(stmt)
+
+#     return list(orders)
+
+
+async def get_orders_with_products_through_secondary(session: AsyncSession):
+    """Загрузка через промежуточную таблицу с secondary полем."""
+
+    orders = await get_orders_with_products(session)
+    for order in orders:
+        print(order.id, order.promocode, order.created_at, "products:")
+        for product in order.products:
+            print(f"{product.id} | {product.name} | {product.price}")
+
+
+async def get_orders_with_products_assotiation(session: AsyncSession) -> List[Order]:
+    # Мы к заказу подключаем информацию о товарах, но сами поля этого товара
+    # не подгружаем, поэтому надо подгрузить вручную через joinedload
+
     stmt = (
         select(Order)
         .options(
-            selectinload(Order.products),
+            selectinload(Order.products_details).joinedload(
+                OrderProductAssociation.product
+            ),
         )
         .order_by(Order.id)
     )
@@ -179,20 +208,30 @@ async def get_orders_with_products(session: AsyncSession) -> list[Order]:
     return list(orders)
 
 
-async def get_orders_with_products_through_secondary(session: AsyncSession):
-    orders = await get_orders_with_products(session)
+async def get_orders_with_products_with_association(session: AsyncSession):
+    """Запос данных из таблицы Заказов без сквозной таблицы."""
+
+    orders = await get_orders_with_products_assotiation(session)
+
     for order in orders:
-        print(order.id, order.promocode, order.created_at, "products:")
-        for product in order.products:
-            print(f"{product.id} | {product.name} | {product.price}")
+        print(
+            order.id,
+            order.promocode,
+            order.created_at,
+            "products:",
+        )
+        for order_product_details in order.products_details:
+            print(
+                f"{order_product_details.product.id} | {order_product_details.product.name} | {order_product_details.product.price}"
+            )
 
 
 async def demo_m2m(session: AsyncSession):
-    orders = await get_orders_with_products(session)
-    for order in orders:
-        print(order.id, order.promocode, order.created_at, "products:")
-        for product in order.products:
-            print(f"{product.id} | {product.name} | {product.price}")
+    await get_orders_with_products_with_association(session)
+    # for order in orders:
+    #     print(order.id, "|", order.promocode, "|", order.created_at, "|", "products:")
+    #     for product in order.products:
+    #         print(f"{product.id} | {product.name} | {product.price}")
 
 
 async def main():
