@@ -19,7 +19,7 @@ class OrderProductAssociation(Base):
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     count: Mapped[int] = mapped_column(default=1, server_default="1")
-    # current_price: Mapped[int] = mapped_column(default=1)
+    current_price: Mapped[int] = mapped_column(default=0, server_default="0")
 
     # ассоциация между текущим классом и Order
     order: Mapped["Order"] = relationship(back_populates="products_details")

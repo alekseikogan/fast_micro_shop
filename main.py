@@ -7,7 +7,7 @@ from api_v1 import router as router_v1
 from core.config import settings
 from items_views import router as items_router
 from users.views import router as users_router
-
+from api_v1.auth.views import router as auth_router
 
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
@@ -17,37 +17,30 @@ from users.views import router as users_router
 
 
 app = FastAPI(
-    title='MicroShop',
+    title="MicroShop",
 )
 
 app.include_router(items_router)
 app.include_router(users_router)
 app.include_router(router_v1, prefix=settings.api_v1_prefix)
+app.include_router(auth_router)
 
 
-@app.get('/')
+@app.get("/")
 def index():
-    return {
-        'message': 'Hello index!'
-    }
+    return {"message": "Hello index!"}
 
 
-@app.get('/hello')
-def hello(name: str = 'world'):
+@app.get("/hello")
+def hello(name: str = "world"):
     name = name.strip().title()
-    return {
-        'message': f'Hello, {name}!'
-    }
+    return {"message": f"Hello, {name}!"}
 
 
-@app.post('/calc')
+@app.post("/calc")
 def calc(a: int, b: int):
-    return {
-        'a': a,
-        'b': b,
-        'sum': a + b
-    }
+    return {"a": a, "b": b, "sum": a + b}
 
 
-if __name__ == '__main__':
-    uvicorn.run('main:app', reload=True)
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True)
