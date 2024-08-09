@@ -105,7 +105,7 @@ def basic_auth_login_cookie(
     response: Response,
     username: str = Depends(basic_auth_username)
 ):
-    """Авторизация через Cookie."""
+    """Аутентификация через Cookie."""
 
     def generate_session_id() -> str:
         return uuid.uuid4().hex
