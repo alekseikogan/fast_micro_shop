@@ -11,7 +11,7 @@ class CreateUser(BaseModel):
 class UserSchema(BaseModel):
     model_config = ConfigDict(strict=True)
 
-    uasername: str
+    username: str
     password: bytes
     email: EmailStr | None = None
     active: bool = True

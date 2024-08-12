@@ -15,16 +15,16 @@ def encode_jwt(payload, privat_key, algorithm):
 
 
 def decode_jwt(
-        token: str,
-        public_key: str = settings.auth_jwt.publickey_path.read_text(),
-        algorithm: str = settings.auth_jwt.algorithm
+    token: str | bytes,
+    public_key: str = settings.auth_jwt.publickey_path.read_text(),
+    algorithm: str = settings.auth_jwt.algorithm
 ):
     """Расшифровывает JWT-токен."""
-
+    
     decoded = jwt.decode(
         token,
-        public_key
-        algorithm=[algorithm],
+        public_key,
+        algorithms=[algorithm],
     )
     return decoded
 
