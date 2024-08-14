@@ -1,6 +1,8 @@
 import datetime
-import jwt
+
 import bcrypt
+import jwt
+
 from core.config import settings
 
 
@@ -30,7 +32,7 @@ def decode_jwt(
     algorithm: str = settings.auth_jwt.algorithm
 ):
     """Расшифровывает JWT-токен."""
-    
+
     decoded = jwt.decode(
         token,
         public_key,

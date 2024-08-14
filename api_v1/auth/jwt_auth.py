@@ -1,8 +1,13 @@
-from .utils import hash_password, validate_password, encode_jwt
 from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jwt import InvalidTokenError
 from pydantic import BaseModel
 
 from users.schemas import UserSchema
+
+from .utils import decode_jwt, encode_jwt, hash_password, validate_password
+
+http_bearer = HTTPBearer()
 
 
 class TokenInfo(BaseModel):
@@ -67,3 +72,57 @@ def get_jwt_token(user: UserSchema = Depends(validate_user_login)):
     return TokenInfo(
         access_token=token,
         token_type='Bearer')
+
+
+def get_current_token_payload(
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer)
+) -> UserSchema:
+    """Получает payload для передачи далее."""
+    token = credentials.credentials
+
+    try:
+        payload = decode_jwt(token)
+    except InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f'Неверный токен: {e}'
+        )
+
+    return payload
+
+
+def get_current_user(
+    payload: dict = Depends(get_current_token_payload),
+) -> UserSchema:
+    """Получает данные о пользователе."""
+
+    username: str = payload.get('sub')
+    if user := users_db.get(username):
+        return user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Пользователь не найден!'
+    )
+
+
+def get_current_active_user(user: UserSchema = Depends(get_current_user)):
+    """Получение информации о пользователе."""
+    if user.active:
+        return user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail='Пользователь неактивен!'
+    )
+
+
+@router.get('/users/me')
+def auth_user_check_self_info(
+    user: UserSchema = Depends(get_current_active_user)
+):
+    """Получение информации о пользователе по его токену."""
+
+    return {
+        "username": user.username,
+        "email": user.email,
+    }
