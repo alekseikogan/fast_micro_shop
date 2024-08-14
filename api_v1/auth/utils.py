@@ -1,15 +1,25 @@
+import datetime
 import jwt
 import bcrypt
 from core.config import settings
 
 
-def encode_jwt(payload, privat_key, algorithm):
-    """Создает JWT-токен."""
-
-    encoded = jwt.encode(
+def encode_jwt(
         payload: dict,
         privat_key: str = settings.auth_jwt.privatekey_path.read_text(),
         algorithm: str = settings.auth_jwt.algorithm,
+        expire_minutes: int = settings.auth_jwt.access_token_expire_minutes):
+    """Создает JWT-токен c ограниченным сроком действия."""
+
+    now = datetime.datetime.now(datetime.UTC)
+    to_encode = payload.copy()
+    expire = now + datetime.timedelta(minutes=expire_minutes)
+    to_encode.update(exp=expire, iat=now)
+
+    encoded = jwt.encode(
+        to_encode,
+        privat_key,
+        algorithm=algorithm,
     )
     return encoded
 
@@ -29,9 +39,7 @@ def decode_jwt(
     return decoded
 
 
-def hash_password(
-    password: str
-) -> bytes:
+def hash_password(password: str) -> bytes:
     """Хэширует пароль."""
 
     salt = bcrypt.gensalt()
