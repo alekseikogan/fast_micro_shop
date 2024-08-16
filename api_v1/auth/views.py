@@ -17,6 +17,7 @@ def basic_auth(
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 ):
     """Аутентификация пользователя."""
+
     return {
         "message": "Успешно получилось!",
         "username": credentials.username,

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import BaseModel
 
@@ -7,7 +7,8 @@ from users.schemas import UserSchema
 
 from .utils import decode_jwt, encode_jwt, hash_password, validate_password
 
-http_bearer = HTTPBearer()
+# http_bearer = HTTPBearer()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/jwt/login/")
 
 
 class TokenInfo(BaseModel):
@@ -75,9 +76,11 @@ def get_jwt_token(user: UserSchema = Depends(validate_user_login)):
 
 
 def get_current_token_payload(
-    credentials: HTTPAuthorizationCredentials = Depends(http_bearer)
+    # credentials: HTTPAuthorizationCredentials = Depends(http_bearer)
+    token: str = Depends(oauth2_scheme),
 ) -> UserSchema:
     """Получает payload для передачи далее."""
+
     token = credentials.credentials
 
     try:
@@ -94,7 +97,7 @@ def get_current_token_payload(
 def get_current_user(
     payload: dict = Depends(get_current_token_payload),
 ) -> UserSchema:
-    """Получает данные о пользователе."""
+    """Получает данные о пользователе по payload."""
 
     username: str = payload.get('sub')
     if user := users_db.get(username):
@@ -106,7 +109,7 @@ def get_current_user(
 
 
 def get_current_active_user(user: UserSchema = Depends(get_current_user)):
-    """Получение информации о пользователе."""
+    """Получение активного пользователя."""
     if user.active:
         return user
 
