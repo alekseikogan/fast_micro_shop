@@ -81,10 +81,10 @@ def get_current_token_payload(
 ) -> UserSchema:
     """Получает payload для передачи далее."""
 
-    token = credentials.credentials
+    # token = credentials.credentials
 
     try:
-        payload = decode_jwt(token)
+        payload = decode_jwt(token=token)
     except InvalidTokenError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
