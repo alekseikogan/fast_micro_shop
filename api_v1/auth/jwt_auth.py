@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import BaseModel
 
+from api_v1.auth.helpers import create_access_token
 from users.schemas import UserSchema
 
-from .utils import decode_jwt, encode_jwt, hash_password, validate_password
+from .utils import decode_jwt, hash_password, validate_password
 
 # http_bearer = HTTPBearer()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/jwt/login/")
@@ -14,7 +15,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/jwt/login/")
 class TokenInfo(BaseModel):
 
     access_token: str
-    token_type: str
+    refresh_token: str
+    token_type: str = 'Bearer'
 
 
 alex = UserSchema(
@@ -63,16 +65,10 @@ def validate_user_login(
 def get_jwt_token(user: UserSchema = Depends(validate_user_login)):
     """Получение JWT токена пользователем."""
 
-    jwt_payload = {
-        'sub': user.username,
-        'username': user.username,
-        'email': user.email,
-    }
+    access_token = create_access_token(user)
+    refresh_token = ...
 
-    token = encode_jwt(jwt_payload)
-    return TokenInfo(
-        access_token=token,
-        token_type='Bearer')
+    return TokenInfo(access_token=access_token, refresh_token=refresh_token)
 
 
 def get_current_token_payload(
