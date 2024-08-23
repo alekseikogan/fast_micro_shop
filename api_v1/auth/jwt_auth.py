@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import BaseModel
 
-from api_v1.auth.helpers import create_access_token
+from api_v1.auth.helpers import create_access_token, create_refresh_token
 from users.schemas import UserSchema
 
 from .utils import decode_jwt, hash_password, validate_password
@@ -66,7 +66,7 @@ def get_jwt_token(user: UserSchema = Depends(validate_user_login)):
     """Получение JWT токена пользователем."""
 
     access_token = create_access_token(user)
-    refresh_token = ...
+    refresh_token = create_refresh_token(user)
 
     return TokenInfo(access_token=access_token, refresh_token=refresh_token)
 

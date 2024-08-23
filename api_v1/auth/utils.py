@@ -7,10 +7,11 @@ from core.config import settings
 
 
 def encode_jwt(
-        payload: dict,
-        privat_key: str = settings.auth_jwt.privatekey_path.read_text(),
-        algorithm: str = settings.auth_jwt.algorithm,
-        expire_minutes: int = settings.auth_jwt.access_token_expire_minutes):
+    payload: dict,
+    privat_key: str = settings.auth_jwt.privatekey_path.read_text(),
+    algorithm: str = settings.auth_jwt.algorithm,
+    expire_minutes: int = settings.auth_jwt.access_token_expire_minutes,
+) -> str:
     """Создает JWT-токен c ограниченным сроком действия."""
 
     now = datetime.datetime.now(datetime.UTC)
