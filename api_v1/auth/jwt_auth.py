@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import BaseModel
 
-from api_v1.auth.helpers import create_access_token, create_refresh_token
+from api_v1.auth.helpers import ACCESS_TOKEN_TYPE, TOKEN_TYPE_FIELD, create_access_token, create_refresh_token
 from users.schemas import UserSchema
 
 from .utils import decode_jwt, hash_password, validate_password
 
-# http_bearer = HTTPBearer()
+http_bearer = HTTPBearer(auto_error=False)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/jwt/login/")
 
 
@@ -36,8 +36,9 @@ users_db: dict[str, UserSchema] = {
 }
 
 router = APIRouter(
-    prefix='/jwt',
-    tags=['JWT']
+    prefix="/jwt",
+    tags=["JWT"],
+    dependencies=[Depends(http_bearer)]
 )
 
 
@@ -96,8 +97,17 @@ def get_current_user(
     """Получает данные о пользователе по payload."""
 
     username: str = payload.get('sub')
+    token_type = payload.get(TOKEN_TYPE_FIELD)
+
+    if token_type != ACCESS_TOKEN_TYPE:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Неверный тип токена - {token_type!r}! ожидаем {ACCESS_TOKEN_TYPE}.",
+        )
+
     if user := users_db.get(username):
         return user
+
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Пользователь не найден!'
