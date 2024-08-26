@@ -27,6 +27,7 @@ def create_jwt(
 
 def create_access_token(user: UserSchema) -> str:
     """Создание ACCESS токена для пользователя в виде строчки."""
+
     jwt_payload = {
         "sub": user.username,
         "username": user.username,
@@ -41,6 +42,7 @@ def create_access_token(user: UserSchema) -> str:
 
 def create_refresh_token(user: UserSchema) -> str:
     """Создание REFRESH токена для пользователя."""
+
     jwt_payload = {
         "sub": user.username,
     }

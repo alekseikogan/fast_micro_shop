@@ -46,6 +46,8 @@ def validate_user_login(
     username: str = Form(),
     password: str = Form(),
 ):
+    """Проверка логина и пароля пользователя"""
+
     unauthed_exp = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Неверное имя или пароль!'
@@ -79,7 +81,6 @@ def get_current_token_payload(
     """Получает payload для передачи далее."""
 
     # token = credentials.credentials
-
     try:
         payload = decode_jwt(token=token)
     except InvalidTokenError as e:
@@ -96,15 +97,14 @@ def get_current_user(
 ) -> UserSchema:
     """Получает данные о пользователе по payload."""
 
-    username: str = payload.get('sub')
     token_type = payload.get(TOKEN_TYPE_FIELD)
-
     if token_type != ACCESS_TOKEN_TYPE:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Неверный тип токена - {token_type!r}! ожидаем {ACCESS_TOKEN_TYPE}.",
         )
 
+    username: str = payload.get('sub')
     if user := users_db.get(username):
         return user
 
