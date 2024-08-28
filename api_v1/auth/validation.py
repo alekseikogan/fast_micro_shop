@@ -28,7 +28,7 @@ def get_current_token_payload(
 
 
 def validate_token_type(payload: dict, token_type: str) -> bool:
-    """Проверяет тип токена."""
+    """Проверяет тип токена на соответствие."""
 
     current_token_type = payload.get(TOKEN_TYPE_FIELD)
     if current_token_type == token_type:
@@ -41,36 +41,49 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
 
 
 def get_user_by_token_sub(
-        payload: dict = Depends(get_current_token_payload)):
-    """Получает данные о пользователе по payload."""
+        payload: dict):
+    """Получает данные о пользователе по payload
+    и передает User далее."""
 
-    validate_token_type(payload, ACCESS_TOKEN_TYPE)
-
-    return get_user_by_token_sub(payload)
-
-
-def get_current_user(
-    payload: dict = Depends(get_current_token_payload),
-) -> UserSchema:
-    """Получает данные о пользователе по payload."""
-
-    validate_token_type(payload, ACCESS_TOKEN_TYPE)
-
-    return get_user_by_token_sub(payload)
-
-
-def get_current_user_for_refresh(
-    payload: dict = Depends(get_current_token_payload),
-) -> UserSchema:
-    """Получает данные о пользователе по payload."""
-
-    validate_token_type(payload, REFRESH_TOKEN_TYPE)
-
-    username: str = payload.get('sub')
+    username: str = payload.get("sub")
     if user := users_db.get(username):
         return user
 
     raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Пользователь не найден!'
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Пользователь не найден!"
     )
+
+
+def get_user_from_token_of_type(token_type: str):
+    """Возвращает не Юзера, а фабрику с функцией внутри."""
+
+    def get_user_from_token(payload: dict = Depends(get_current_token_payload)
+                            ) -> UserSchema:
+        """Получает данные о пользователе по payload."""
+
+        validate_token_type(payload, token_type)
+        return get_user_by_token_sub(payload=payload)
+
+    return get_user_from_token
+
+
+get_current_user = get_user_from_token_of_type(ACCESS_TOKEN_TYPE)
+get_current_user_for_refresh = get_user_from_token_of_type(REFRESH_TOKEN_TYPE)
+
+# def get_current_user(
+#     payload: dict = Depends(get_current_token_payload),
+# ) -> UserSchema:
+#     """Получает данные о пользователе по payload через
+#     вспомогательную функцию."""
+
+#     validate_token_type(payload, ACCESS_TOKEN_TYPE)
+#     return get_user_by_token_sub(payload=payload)
+
+
+# def get_current_user_for_refresh(
+#     payload: dict = Depends(get_current_token_payload),
+# ) -> UserSchema:
+#     """Получает данные о пользователе по payload."""
+
+#     validate_token_type(payload, REFRESH_TOKEN_TYPE)
+#     return get_user_by_token_sub(payload=payload)

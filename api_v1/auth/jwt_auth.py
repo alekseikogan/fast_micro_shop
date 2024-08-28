@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from api_v1.auth.helpers import (TOKEN_TYPE_FIELD, create_access_token,
                                  create_refresh_token)
+from api_v1.auth.validation import get_current_user
 from users.schemas import UserSchema
 
 from .utils import validate_password
@@ -65,7 +66,7 @@ def get_current_active_user(user: UserSchema = Depends(get_current_user)):
 
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        detail='Пользователь неактивен!'
+        detail='Пользователь не активен!'
     )
 
 
