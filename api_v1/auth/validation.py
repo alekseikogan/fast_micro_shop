@@ -4,7 +4,7 @@ from jwt import InvalidTokenError
 
 from api_v1.auth.helpers import (ACCESS_TOKEN_TYPE, REFRESH_TOKEN_TYPE,
                                  TOKEN_TYPE_FIELD)
-from api_v1.auth.utils import decode_jwt
+from api_v1.auth.utils import decode_jwt, validate_password
 from users.schemas import UserSchema
 from .crud import users_db
 
@@ -97,3 +97,36 @@ get_current_user_for_refresh = UserGetterFromToken(REFRESH_TOKEN_TYPE)
 
 #     validate_token_type(payload, REFRESH_TOKEN_TYPE)
 #     return get_user_by_token_sub(payload)
+
+
+def get_current_active_user(user: UserSchema = Depends(get_current_user)):
+    """Получение активного пользователя."""
+    if user.active:
+        return user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail='Пользователь не активен!'
+    )
+
+
+def validate_user_login(
+    username: str = Form(),
+    password: str = Form(),
+):
+    """Проверка логина и пароля пользователя."""
+
+    unauthed_exp = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Неверное имя или пароль!'
+    )
+    if not (user := users_db.get(username)):
+        raise unauthed_exp
+
+    if validate_password(
+        password=password,
+        hashed_password=user.password
+    ):
+        return user
+
+    raise unauthed_exp

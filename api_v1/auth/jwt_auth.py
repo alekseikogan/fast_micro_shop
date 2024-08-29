@@ -1,15 +1,13 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 
-from api_v1.auth.helpers import (REFRESH_TOKEN_TYPE, TOKEN_TYPE_FIELD, create_access_token,
-                                 create_refresh_token)
-from api_v1.auth.validation import get_current_user
+from api_v1.auth.helpers import create_access_token, create_refresh_token
 from users.schemas import UserSchema
 
-from .crud import users_db
-from .utils import validate_password
-from .validation import UserGetterFromToken, get_current_user_for_refresh, get_user_from_token_of_type
+
+from .validation import (get_current_active_user, get_current_user_for_refresh,
+                         validate_user_login)
 
 http_bearer = HTTPBearer(auto_error=False)
 
@@ -28,28 +26,6 @@ router = APIRouter(
 )
 
 
-def validate_user_login(
-    username: str = Form(),
-    password: str = Form(),
-):
-    """Проверка логина и пароля пользователя"""
-
-    unauthed_exp = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Неверное имя или пароль!'
-    )
-    if not (user := users_db.get(username)):
-        raise unauthed_exp
-
-    if validate_password(
-        password=password,
-        hashed_password=user.password
-    ):
-        return user
-
-    raise unauthed_exp
-
-
 @router.post("/login", response_model=TokenInfo)
 def get_jwt_token(user: UserSchema = Depends(validate_user_login)):
     """Получение JWT токена пользователем."""
@@ -58,17 +34,6 @@ def get_jwt_token(user: UserSchema = Depends(validate_user_login)):
     refresh_token = create_refresh_token(user)
 
     return TokenInfo(access_token=access_token, refresh_token=refresh_token)
-
-
-def get_current_active_user(user: UserSchema = Depends(get_current_user)):
-    """Получение активного пользователя."""
-    if user.active:
-        return user
-
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail='Пользователь не активен!'
-    )
 
 
 @router.get('/users/me')
