@@ -40,31 +40,8 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
     )
 
 
-def get_user_by_token_sub(
-        payload: dict = Depends(get_current_token_payload)):
-    """Получает данные о пользователе по payload."""
-
-    validate_token_type(payload, ACCESS_TOKEN_TYPE)
-
-    return get_user_by_token_sub(payload)
-
-
-def get_current_user(
-    payload: dict = Depends(get_current_token_payload),
-) -> UserSchema:
-    """Получает данные о пользователе по payload."""
-
-    validate_token_type(payload, ACCESS_TOKEN_TYPE)
-
-    return get_user_by_token_sub(payload)
-
-
-def get_current_user_for_refresh(
-    payload: dict = Depends(get_current_token_payload),
-) -> UserSchema:
-    """Получает данные о пользователе по payload."""
-
-    validate_token_type(payload, REFRESH_TOKEN_TYPE)
+def get_user_by_token_sub(payload: dict) -> UserSchema:
+    """Получает данные о пользователе по заголовку sub."""
 
     username: str = payload.get('sub')
     if user := users_db.get(username):
@@ -74,3 +51,49 @@ def get_current_user_for_refresh(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Пользователь не найден!'
     )
+
+
+def get_user_from_token_of_type(token_type: str):
+    def get_user_from_token(payload: dict = Depends(get_current_token_payload)
+                            ) -> UserSchema:
+
+        validate_token_type(payload, token_type)
+        return get_user_by_token_sub(payload)
+
+    return get_user_from_token
+
+
+get_current_user = get_user_from_token_of_type(ACCESS_TOKEN_TYPE)
+
+# def get_current_user(
+#     payload: dict = Depends(get_current_token_payload),
+# ) -> UserSchema:
+#     """Получает данные о пользователе из payload
+#     по access токену."""
+
+#     validate_token_type(payload, ACCESS_TOKEN_TYPE)
+#     return get_user_by_token_sub(payload) 
+
+
+class UserGetterFromToken:
+    def __init__(self, token_type: str):
+        self.token_type = token_type
+
+    def __call__(
+        self,
+        payload: dict = Depends(get_current_token_payload),
+    ) -> UserSchema:
+        validate_token_type(payload, self.token_type)
+        return get_user_by_token_sub(payload)
+
+
+get_current_user_for_refresh = UserGetterFromToken(REFRESH_TOKEN_TYPE)
+
+# def get_current_user_for_refresh(
+#     payload: dict = Depends(get_current_token_payload),
+# ) -> UserSchema:
+#     """Получает данные о пользователе из payload
+#     по refresh токену."""
+
+#     validate_token_type(payload, REFRESH_TOKEN_TYPE)
+#     return get_user_by_token_sub(payload)

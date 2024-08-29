@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 
-from api_v1.auth.helpers import (TOKEN_TYPE_FIELD, create_access_token,
+from api_v1.auth.helpers import (REFRESH_TOKEN_TYPE, TOKEN_TYPE_FIELD, create_access_token,
                                  create_refresh_token)
 from users.schemas import UserSchema
 
-from .utils import validate_password
 from .crud import users_db
+from .utils import validate_password
+from .validation import UserGetterFromToken, get_current_user_for_refresh, get_user_from_token_of_type
 
 http_bearer = HTTPBearer(auto_error=False)
 
@@ -72,7 +73,7 @@ def get_current_active_user(user: UserSchema = Depends(get_current_user)):
 @router.get('/users/me')
 def auth_user_check_self_info(
     user: UserSchema = Depends(get_current_active_user)
-):
+) -> dict:
     """Получение информации о пользователе по его токену."""
 
     return {
@@ -87,8 +88,11 @@ def auth_user_check_self_info(
         response_model_exclude_none=True
     )
 def refresh_jwt_token(
-    user: UserSchema = Depends(get_current_active_user)
-):
+    user: UserSchema = Depends(get_current_user_for_refresh)
+    # ниже приведены различные вариации получения пользователя
+    # user: UserSchema = Depends(get_user_from_token_of_type(REFRESH_TOKEN_TYPE))
+    # user: UserSchema = Depends(UserGetterFromToken(REFRESH_TOKEN_TYPE))
+) -> TokenInfo:
     """Обновление JWT токена."""
 
     access_token = create_access_token(user)
