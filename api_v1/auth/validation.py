@@ -31,12 +31,14 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
     """Проверяет тип токена на соответствие."""
 
     current_token_type = payload.get(TOKEN_TYPE_FIELD)
+    print(f'current_token_type = {current_token_type}')
+    print(f'token_type = {token_type}')
     if current_token_type == token_type:
         return True
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail=f"Неверный тип токена - {token_type!r}! ожидаем {ACCESS_TOKEN_TYPE}.",
+        detail=f"Неверный тип токена. Сейчас он - {current_token_type!r}! Ожидаем {token_type}.",
     )
 
 
@@ -72,7 +74,7 @@ get_current_user = get_user_from_token_of_type(ACCESS_TOKEN_TYPE)
 #     по access токену."""
 
 #     validate_token_type(payload, ACCESS_TOKEN_TYPE)
-#     return get_user_by_token_sub(payload) 
+#     return get_user_by_token_sub(payload)
 
 
 class UserGetterFromToken:
