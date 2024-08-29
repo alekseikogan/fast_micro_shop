@@ -28,7 +28,7 @@ def get_current_token_payload(
 
 
 def validate_token_type(payload: dict, token_type: str) -> bool:
-    """Проверяет тип токена."""
+    """Проверяет тип токена на соответствие."""
 
     current_token_type = payload.get(TOKEN_TYPE_FIELD)
     if current_token_type == token_type:
@@ -43,7 +43,7 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
 def get_user_by_token_sub(payload: dict) -> UserSchema:
     """Получает данные о пользователе по заголовку sub."""
 
-    username: str = payload.get('sub')
+    username: str = payload.get("sub")
     if user := users_db.get(username):
         return user
 
