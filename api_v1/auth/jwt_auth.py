@@ -97,5 +97,4 @@ def refresh_jwt_token(
     """Обновление JWT токена."""
 
     access_token = create_access_token(user)
-
     return TokenInfo(access_token=access_token)

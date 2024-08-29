@@ -31,14 +31,12 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
     """Проверяет тип токена на соответствие."""
 
     current_token_type = payload.get(TOKEN_TYPE_FIELD)
-    print(f'current_token_type = {current_token_type}')
-    print(f'token_type = {token_type}')
     if current_token_type == token_type:
         return True
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail=f"Неверный тип токена. Сейчас он - {current_token_type!r}! Ожидаем {token_type}.",
+        detail=f"Неверный тип токена. Сейчас он - {current_token_type!r}! Ожидаем - {token_type}.",
     )
 
 
