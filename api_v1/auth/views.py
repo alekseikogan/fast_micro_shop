@@ -74,9 +74,9 @@ static_auth_token_to_username = {
 
 
 def get_username_by_static_token(
-        static_token: str = Header(alias='x-secret-token')
+    static_token: str = Header(alias='x-secret-token')
 ) -> str:
-    """Проверяет токен и выдает имя пользователя если токен верный."""
+    """Проверяет токен и показывает имя пользователя, если токен верный."""
 
     if static_token not in static_auth_token_to_username:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -162,4 +162,4 @@ def logout_cookie(
     COOKIES.pop(session_id)
     response.delete_cookie(COOKIE_SESSION_ID_KEY)
     username = user_session_data["username"]
-    return {"message": f"ВЫ РАЗЛОГИНИЛИСЬ, {username}"}
+    return {"message": f"{username}, Вы успешно вышли из учетной записи!"}
