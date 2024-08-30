@@ -1,10 +1,14 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, async_scoped_session, AsyncSession
-from core.config import settings
 from asyncio import current_task
+
+from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
+                                    async_sessionmaker, create_async_engine)
+
+from core.config import settings
 
 
 class DatabaseHelper:
     def __init__(self, url: str, echo: bool = False):
+        # создание движка
         self.engine = create_async_engine(
             url=url,
             echo=echo,
