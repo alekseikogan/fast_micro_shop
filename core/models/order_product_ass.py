@@ -37,8 +37,8 @@ class OrderProductAssociation(Base):
 # )
 
 
-# так можно оставить, но если расширить с id, то
-# лучше сделать иначе
+# Так делал в самый первый раз и можно оставить, но если расширить с id, то
+# лучше сделать иначе (вариант выше)
 # order_product_association = Table(
 #     "order_product_association",
 #     Base.metadata,

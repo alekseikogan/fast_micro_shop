@@ -185,6 +185,7 @@ async def create_orders_and_products(session: AsyncSession):
     await session.commit()
 
 
+# Так делал в начале
 # async def get_orders_with_products(session: AsyncSession) -> list[Order]:
 #     """Получает заказы с подгрузкой продуктов."""
 
@@ -199,7 +200,7 @@ async def create_orders_and_products(session: AsyncSession):
 
 #     return list(orders)
 
-
+# Так делал в начале
 # async def get_orders_with_products_through_secondary(session: AsyncSession):
 #     """Загрузка через промежуточную таблицу с secondary полем."""
 
